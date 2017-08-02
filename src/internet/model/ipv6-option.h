@@ -274,6 +274,59 @@ public:
   virtual uint8_t Process (Ptr<Packet> packet, uint8_t offset, Ipv6Header const& ipv6Header, bool& isDropped);
 };
 
+
+//MIPv6 Extension Starts
+
+/**
+ * \class Ipv6HomeAddressOption
+ * \brief IPv6 Home Address Option
+ */
+class Ipv6HomeAddressOption : public Ipv6Option
+{
+public:
+  /**
+   * \brief Router alert option number.
+   */
+  static const uint8_t OPT_NUMBER = 45;
+
+  /**
+   * \brief Get the type identificator.
+   * \return type identificator
+   */
+  static TypeId GetTypeId ();
+
+  /**
+   * \brief Constructor.
+   */
+  Ipv6HomeAddressOption ();
+
+  /**
+   * \brief Destructor.
+   */
+  ~Ipv6HomeAddressOption ();
+
+  /**
+   * \brief Get the option number.
+   * \return option number
+   */
+  virtual uint8_t GetOptionNumber () const;
+
+  /**
+   * \brief Process method
+   *
+   * Called from Ipv6L3Protocol::Receive.
+   * \param packet the packet
+   * \param offset the offset of the extension to process
+   * \param ipv6Header the IPv6 header of packet received
+   * \param isDropped if the packet must be dropped
+   * \return the processed size
+   */
+  virtual uint8_t Process (Ptr<Packet> packet, uint8_t offset, Ipv6Header const& ipv6Header, bool& isDropped);
+};
+
+//MIPv6 Extension Ends
+
+
 } /* namespace ns3 */
 
 #endif /* IPV6_OPTION_H */

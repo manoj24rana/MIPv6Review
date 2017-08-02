@@ -35,6 +35,9 @@
 #include "ipv6-l3-protocol.h"
 #include "ipv6-interface.h"
 #include "icmpv6-l4-protocol.h"
+#include "ns3/internet-apps-module.h"
+#include "ns3/packet-socket-address.h"
+#include "ns3/ipv6-raw-socket-factory.h"
 
 namespace ns3 {
 
@@ -483,7 +486,14 @@ void Icmpv6L4Protocol::HandleNS (Ptr<Packet> packet, Ipv6Address const &src, Ipv
           break;
         }
     }
+//MIPv6 Extension starts
+  if(!m_NSCallback.IsNull() && !found && m_NSCallback(target) && !m_HandleNSCallback.IsNull())
+    {
+      m_HandleNSCallback(packet, interface, src, target);
+      return;
+    }
 
+//MIPv6 Extension Ends
   if (!found)
     {
       NS_LOG_LOGIC ("Not a NS for us");
@@ -606,7 +616,6 @@ void Icmpv6L4Protocol::HandleNA (Ptr<Packet> packet, Ipv6Address const &src, Ipv
 
   packet->RemoveHeader (naHeader);
   Ipv6Address target = naHeader.GetIpv6Target ();
-
   Address hardwareAddress;
   NdiscCache::Entry* entry = 0;
   Ptr<NdiscCache> cache = FindCache (interface->GetDevice ());
@@ -634,13 +643,27 @@ void Icmpv6L4Protocol::HandleNA (Ptr<Packet> packet, Ipv6Address const &src, Ipv
             }
         }
 
-      if (found)
+      if (found && !m_CheckAddressCallback.IsNull() && m_CheckAddressCallback (src,target))  
+        {
+          
+          return; //MIPv6 Extension
+        }
+
+      else if (found)
         {
           if (ifaddr.GetState () == Ipv6InterfaceAddress::TENTATIVE || ifaddr.GetState () == Ipv6InterfaceAddress::TENTATIVE_OPTIMISTIC)
             {
               interface->SetState (ifaddr.GetAddress (), Ipv6InterfaceAddress::INVALID);
             }
         }
+//MIPv6 Extension for DAD checking in HA
+
+        else
+         {
+         if (!m_DADCallback.IsNull())
+           m_DADCallback(target);
+         }
+//MIPv6 Extension ends
 
       /* we have not initiated any communication with the target so... discard the NA */
       return;
@@ -1384,6 +1407,44 @@ bool Icmpv6L4Protocol::Lookup (Ptr<Packet> p, const Ipv6Header & ipHeader, Ipv6A
   return false;
 }
 
+//MIPv6 Extension Starts
+void Icmpv6L4Protocol::SetNewIPCallback (Callback<void, Ipv6Address> newIP)
+{
+  NS_LOG_FUNCTION (this);
+  m_newIPCallback = newIP;
+}
+
+void Icmpv6L4Protocol::SetDADCallback (Callback<void, Ipv6Address> dad)
+{
+  NS_LOG_FUNCTION (this);
+  m_DADCallback = dad;
+}
+
+void Icmpv6L4Protocol::SetNSCallback (Callback<bool, Ipv6Address> ns)
+{
+  NS_LOG_FUNCTION (this);
+  m_NSCallback = ns;
+}
+
+void Icmpv6L4Protocol::SetHandleNSCallback (Callback<void, Ptr<Packet>, Ptr<Ipv6Interface>, Ipv6Address, Ipv6Address> handlens)
+{
+  NS_LOG_FUNCTION (this);
+  m_HandleNSCallback = handlens;
+}
+
+void Icmpv6L4Protocol::SetCheckAddressCallback (Callback<bool, Ipv6Address, Ipv6Address> checkadr)
+{
+  NS_LOG_FUNCTION (this);
+  m_CheckAddressCallback = checkadr;
+}
+
+Ptr<NdiscCache> Icmpv6L4Protocol::GetCache (Ptr<NetDevice> device)
+{
+return FindCache (device);
+}
+
+//MIPv6 Extension Ends
+
 void Icmpv6L4Protocol::FunctionDadTimeout (Ptr<Icmpv6L4Protocol> icmpv6, Ipv6Interface* interface, Ipv6Address addr)
 {
   NS_LOG_FUNCTION_NOARGS ();
@@ -1453,6 +1514,7 @@ Icmpv6L4Protocol::GetDownTarget6 (void) const
   NS_LOG_FUNCTION (this);
   return m_downTarget;
 }
+
 
 } /* namespace ns3 */
 

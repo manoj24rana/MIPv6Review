@@ -513,6 +513,15 @@ void Ipv6Interface::SetState (Ipv6Address address, Ipv6InterfaceAddress::State_e
       if (it->first.GetAddress () == address)
         {
           it->first.SetState (state);
+
+          //MIPv6
+          Ptr<Icmpv6L4Protocol> icmptr=m_node->GetObject<Icmpv6L4Protocol>();
+          if(state==Ipv6InterfaceAddress::PREFERRED && !icmptr->m_newIPCallback.IsNull())
+          {
+          icmptr->m_newIPCallback(address);      
+          }
+
+
           return;
         }
     }

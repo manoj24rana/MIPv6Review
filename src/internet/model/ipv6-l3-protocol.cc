@@ -355,6 +355,12 @@ void Ipv6L3Protocol::AddAutoconfiguredAddress (uint32_t interface, Ipv6Address n
       if (!defaultRouter.IsAny())
         {
           GetRoutingProtocol ()->NotifyAddRoute (Ipv6Address::GetAny (), Ipv6Prefix ((uint8_t)0), defaultRouter, interface, network);
+//MIPv6 Extension Starts
+
+          if (!m_RouterPrefix.IsNull())
+            m_RouterPrefix(defaultRouter,interface);
+
+//MIPv6 Extension ends
         }
 
       Ptr<Ipv6AutoconfiguredPrefix> aPrefix = CreateObject<Ipv6AutoconfiguredPrefix> (m_node, interface, network, mask, preferredTime, validTime, defaultRouter);
@@ -1029,6 +1035,16 @@ void Ipv6L3Protocol::Receive (Ptr<NetDevice> device, Ptr<const Packet> p, uint16
           LocalDeliver (packet, hdr, interface);
           // do not return, the packet could be handled by a routing protocol
         }
+//MIPv6 Extension Starts
+
+      else if(!m_NSCallback2.IsNull() && m_NSCallback2(hdr.GetDestinationAddress ()))
+        {
+
+          LocalDeliver (packet, hdr, interface);
+          return;        
+        }
+//MIPv6 Extension Ends
+
     }
 
 
@@ -1481,6 +1497,14 @@ void Ipv6L3Protocol::RegisterExtensions ()
   looseRoutingExtension->SetNode (m_node);
   routingExtensionDemux->Insert (looseRoutingExtension);
 
+//MIPv6 Extension starts
+
+  Ptr<Ipv6ExtensionType2Routing> type2RoutingExtension = CreateObject<Ipv6ExtensionType2Routing> ();
+  type2RoutingExtension->SetNode (m_node);
+  routingExtensionDemux->Insert (type2RoutingExtension);
+
+//MIPv6 Extension ends
+
   m_node->AggregateObject (routingExtensionDemux);
   m_node->AggregateObject (ipv6ExtensionDemux);
 }
@@ -1498,11 +1522,19 @@ void Ipv6L3Protocol::RegisterOptions ()
   jumbogramOption->SetNode (m_node);
   Ptr<Ipv6OptionRouterAlert> routerAlertOption = CreateObject<Ipv6OptionRouterAlert> ();
   routerAlertOption->SetNode (m_node);
+//MIPv6 Extension
+  Ptr<Ipv6HomeAddressOption> homeAddressOption = CreateObject<Ipv6HomeAddressOption> ();
+  homeAddressOption->SetNode (m_node);
+//end
+
 
   ipv6OptionDemux->Insert (pad1Option);
   ipv6OptionDemux->Insert (padnOption);
   ipv6OptionDemux->Insert (jumbogramOption);
   ipv6OptionDemux->Insert (routerAlertOption);
+//MIPv6 Extension
+  ipv6OptionDemux->Insert (homeAddressOption);
+//end
 
   m_node->AggregateObject (ipv6OptionDemux);
 }
@@ -1589,6 +1621,22 @@ bool Ipv6L3Protocol::IsRegisteredMulticastAddress (Ipv6Address address) const
     }
   return true;
 }
+
+//MIPv6 Extension Starts
+
+void Ipv6L3Protocol::SetNSCallback2 (Callback<bool, Ipv6Address> ns)
+{
+  NS_LOG_FUNCTION (this);
+  m_NSCallback2 = ns;
+}
+
+void Ipv6L3Protocol::SetPrefixCallback (Callback<void, Ipv6Address, uint32_t> ip)
+{
+  NS_LOG_FUNCTION (this);
+  m_RouterPrefix = ip;
+}
+
+//MIPv6 Extension Ends
 
 } /* namespace ns3 */
 

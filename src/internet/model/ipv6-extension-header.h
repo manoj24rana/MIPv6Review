@@ -28,6 +28,8 @@
 #include "ns3/header.h"
 #include "ns3/ipv6-address.h"
 #include "ipv6-option-header.h"
+//MIPv6 Extension includes the following header
+#include "ns3/ipv6-address.h"
 
 namespace ns3
 {
@@ -517,6 +519,102 @@ private:
    */
   uint8_t m_segmentsLeft;
 };
+
+//MIPv6 Extension starts
+
+/**
+ * \class Ipv6ExtensionType2RoutingHeader
+ * \brief Header of IPv6 Extension Type2 Routing
+ */
+class Ipv6ExtensionType2RoutingHeader : public Ipv6ExtensionRoutingHeader
+{
+public:
+  /**
+   * \brief Get the type identificator.
+   * \return type identificator
+   */
+  static TypeId GetTypeId ();
+
+  /**
+   * \brief Get the instance type ID.
+   * \return instance type ID
+   */
+  virtual TypeId GetInstanceTypeId () const;
+
+  /**
+   * \brief Constructor.
+   */
+  Ipv6ExtensionType2RoutingHeader ();
+
+  /**
+   * \brief Destructor.
+   */
+  virtual ~Ipv6ExtensionType2RoutingHeader ();
+
+  /**
+   * \brief set reserved2 field.
+   * \param reserved reserved2 value
+   */
+  void SetReserved(uint32_t reserved);
+
+  /**
+   * \brief get reserved2 field.
+   * \return reserved2 value
+   */
+  uint32_t GetReserved() const;
+
+  /**
+   * \brief set home address.
+   * \param ip home address
+   */
+  void SetHomeAddress(Ipv6Address ip);
+
+  /**
+   * \brief get home address.
+   * \return home address
+   */
+  Ipv6Address GetHomeAddress() const;
+
+  /**
+   * \brief Print some informations about the packet.
+   * \param os output stream
+   * \return info about this packet
+   */
+  virtual void Print (std::ostream &os) const;
+
+  /**
+   * \brief Get the serialized size of the packet.
+   * \return size
+   */
+  virtual uint32_t GetSerializedSize () const;
+
+  /**
+   * \brief Serialize the packet.
+   * \param start Buffer iterator
+   */
+  virtual void Serialize (Buffer::Iterator start) const;
+
+  /**
+   * \brief Deserialize the packet.
+   * \param start Buffer iterator
+   * \return size of the packet
+   */
+  virtual uint32_t Deserialize (Buffer::Iterator start);
+
+private:
+
+  /**
+   * \brief reserved 2
+   */
+  uint32_t m_reserved;
+
+  /**
+   * \brief home address
+   */
+  Ipv6Address m_hoa;
+};
+
+//MIPv6 Extension ends
 
 /**
  * \class Ipv6ExtensionLooseRoutingHeader

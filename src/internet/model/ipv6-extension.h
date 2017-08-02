@@ -587,6 +587,57 @@ public:
                            Ipv6L3Protocol::DropReason& dropReason);
 };
 
+
+//MIPv6 Extension starts
+
+/**
+ * \class Ipv6ExtensionType2Routing
+ * \brief IPv6 Extension Type 2 Routing
+ */
+class Ipv6ExtensionType2Routing : public Ipv6ExtensionRouting
+{
+public:
+  /**
+   * \brief Routing type.
+   */
+  static const uint8_t TYPE_ROUTING = 2;
+
+  /**
+   * \brief Get the type identificator.
+   * \return type identificator
+   */
+  static TypeId GetTypeId ();
+
+  /**
+   * \brief Constructor.
+   */
+  Ipv6ExtensionType2Routing ();
+
+  /**
+   * \brief Destructor.
+   */
+  ~Ipv6ExtensionType2Routing ();
+
+  /**
+   * \brief Get the type of routing.
+   * \return type of routing
+   */
+  virtual uint8_t GetTypeRouting () const;
+
+  virtual uint8_t Process (Ptr<Packet>& packet,
+                           uint8_t offset,
+                           Ipv6Header const& ipv6Header,
+                           Ipv6Address dst,
+                           uint8_t *nextHeader,
+                           bool& stopProcessing,
+                           bool& isDropped,
+                           Ipv6L3Protocol::DropReason& dropReason);
+};
+
+
+//MIPv6 Extension ends
+
+
 /**
  * \class Ipv6ExtensionESP
  * \brief IPv6 Extension ESP (Encapsulating Security Payload)
@@ -674,6 +725,8 @@ public:
                            bool& isDropped,
                            Ipv6L3Protocol::DropReason& dropReason);
 };
+
+
 
 } /* namespace ns3 */
 

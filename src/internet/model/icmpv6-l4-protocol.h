@@ -31,6 +31,7 @@
 #include "icmpv6-header.h"
 #include "ip-l4-protocol.h"
 #include "ndisc-cache.h"
+#include "ns3/internet-apps-module.h"
 
 namespace ns3 {
 
@@ -209,6 +210,70 @@ public:
    * \param ttl next hop limit
    */
   void SendMessage (Ptr<Packet> packet, Ipv6Address dst, Icmpv6Header& icmpv6Hdr, uint8_t ttl);
+
+
+  //MIPv6
+
+  /**
+   * Callback signature for new IPv6 address configuration event.
+  */
+  Callback<void, Ipv6Address> m_newIPCallback;
+
+  /**
+   * Set Callback for new IPv6 address configuration event triggering.
+  */
+  void SetNewIPCallback (Callback<void, Ipv6Address> newIP);
+
+  /**
+   * Callback signature for DAD failure indication at home agent while 
+   * configuring address on behalf of mobile node.
+  */
+  Callback<void, Ipv6Address> m_DADCallback;
+
+  /**
+   * Set Callback for new DAD failure indication triggering.
+  */
+  void SetDADCallback (Callback<void, Ipv6Address> dad);
+
+  /**
+   * Callback signature for checking whether the address is assigned to any mobile node
+   * which is currently detached from its home network.
+   */
+  Callback<bool, Ipv6Address> m_NSCallback;
+
+  /**
+   * Set Callback for home address checking of an off-link mobile node.
+   */
+  void SetNSCallback (Callback<bool, Ipv6Address> ns);
+
+  /**
+   * Callback signature for hand over the task of handling NS to a home agent on behalf of
+   * some mobile nodes which are currently off-link and if the target address is matched the
+   * address which that hime agent is protecting.
+   */
+  Callback<void, Ptr<Packet>, Ptr<Ipv6Interface>, Ipv6Address, Ipv6Address> m_HandleNSCallback;
+
+  /**
+   * Set Callback for handling NS on behalf of offlink mobile nodes.
+   */
+  void SetHandleNSCallback (Callback<void, Ptr<Packet>, Ptr<Ipv6Interface>, Ipv6Address, Ipv6Address> handlens);
+
+  /**
+   * Callback signature currently not used.
+   */
+  Callback<bool, Ipv6Address, Ipv6Address> m_CheckAddressCallback;
+
+  /**
+   * Set Callback currently not used.
+   */
+  void SetCheckAddressCallback (Callback<bool, Ipv6Address, Ipv6Address> checkadr);
+
+  /**
+   * \brief Get the Cache.
+   * \param device the netdevice associated
+   * \return a neighbor cache
+   */
+  Ptr<NdiscCache> GetCache (Ptr<NetDevice> device);
 
   /**
    * \brief Do the Duplication Address Detection (DAD).
@@ -422,6 +487,8 @@ public:
    */
   int64_t AssignStreams (int64_t stream);
 
+
+
 protected:
   /**
    * \brief Dispose this object.
@@ -577,6 +644,7 @@ private:
   virtual IpL4Protocol::DownTargetCallback6 GetDownTarget6 (void) const;
 
   IpL4Protocol::DownTargetCallback6 m_downTarget; //!< callback to Ipv6::Send
+
 
 };
 
