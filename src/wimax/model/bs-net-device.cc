@@ -232,6 +232,8 @@ BaseStationNetDevice::InitBaseStationNetDevice ()
   m_ssManager = CreateObject<SSManager> ();
   m_bsClassifier = CreateObject<IpcsClassifier> ();
   m_serviceFlowManager = CreateObject<BsServiceFlowManager> (this);
+//Newly Added
+  SetLinkUpCallback (MakeCallback (&BaseStationNetDevice::LinkUp, this));  // +++++++  For MIPv6 support
 
 }
 
@@ -630,7 +632,15 @@ BaseStationNetDevice::DoSend (Ptr<Packet> packet,
 
   if (protocolNumber != 2048 || serviceFlow == 0)
     {
+/*
       serviceFlow = *GetServiceFlowManager ()->GetServiceFlows (ServiceFlow::SF_TYPE_ALL).begin ();
+*/
+std::vector<ServiceFlow*> serviceFlows = GetServiceFlowManager ()->GetServiceFlows (ServiceFlow::SF_TYPE_BE);
+	  
+	  if(serviceFlows.size() > 0)
+	    {
+		  serviceFlow = *serviceFlows.begin();
+		}  // +++++++  For MIPv6 support
     }
 
   if (serviceFlow == 0)
@@ -688,7 +698,8 @@ BaseStationNetDevice::DoReceive (Ptr<Packet> packet)
   Ptr<WimaxConnection> connection = 0;
   FragmentationSubheader fragSubhdr;
   bool fragmentation = false;  // it becames true when there is a fragmentation subheader
-
+  MacHeaderType headerType;   // +++++++  For MIPv6 support
+  packet->RemoveHeader (headerType); // +++++++  For MIPv6 support
   packet->RemoveHeader (gnrcMacHdr);
   if (gnrcMacHdr.GetHt () == MacHeaderType::HEADER_TYPE_GENERIC)
     {
@@ -1235,5 +1246,16 @@ BaseStationNetDevice::RangingOppStart (void)
 
   NS_LOG_DEBUG ("Ranging TO " << (uint32_t) m_rangingOppNumber << ": " << Simulator::Now ().GetSeconds ());
 }
+
+//Newly Added
+void
+BaseStationNetDevice::SetLinkUpCallback (Callback<void> linkUp)
+{
+  NS_LOG_FUNCTION (this);
+  //m_linkUp = linkUp;
+//if(!m_linkUp.IsNull ())
+  //m_linkUp();
+} // +++++++  For MIPv6 support
+
 
 } // namespace ns3

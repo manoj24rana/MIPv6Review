@@ -252,6 +252,9 @@ SubscriberStationNetDevice::InitSubscriberStationNetDevice (void)
   m_linkManager = CreateObject<SSLinkManager> (this);
   m_scheduler = CreateObject<SSScheduler> (this);
   m_serviceFlowManager = CreateObject<SsServiceFlowManager> (this);
+//Newly Added
+  SetLinkUpCallback (MakeCallback (&SubscriberStationNetDevice::LinkUp, this));    // +++++++  For MIPv6 support
+  SetLinkDownCallback (MakeCallback (&SubscriberStationNetDevice::LinkDown, this));    // +++++++  For MIPv6 support
 }
 
 SubscriberStationNetDevice::SubscriberStationNetDevice (Ptr<Node> node, Ptr<WimaxPhy> phy)
@@ -1283,5 +1286,23 @@ SubscriberStationNetDevice::SetTimer (EventId eventId, EventId &event)
 
   event = eventId;
 }
+
+//Newly Added
+  // +++++++  For MIPv6 support
+void
+SubscriberStationNetDevice::SetLinkUpCallback (Callback<void> linkUp)
+{
+  NS_LOG_FUNCTION (this);
+  m_linkUp = linkUp;
+}
+
+void
+SubscriberStationNetDevice::SetLinkDownCallback (Callback<void> linkDown)
+{
+  NS_LOG_FUNCTION (this);
+  m_linkDown = linkDown;
+}
+    // +++++++  For MIPv6 support
+
 
 } // namespace ns`
