@@ -75,6 +75,8 @@ public:
    */
   EpcEnbApplication (Ptr<Socket> lteSocket, Ptr<Socket> s1uSocket, Ipv4Address enbS1uAddress, Ipv4Address sgwS1uAddress, uint16_t cellId);
 
+  void SetLTESocket6(Ptr<Socket> lteSocket6);
+  Ptr<Socket> GetLTESocket6(); 
   /**
    * Destructor
    * 
@@ -122,6 +124,14 @@ public:
    * \param socket pointer to the S1-U socket
    */
   void RecvFromS1uSocket (Ptr<Socket> socket);
+
+  /**
+   * TracedCallback signature for data Packet reception event.
+   *
+   * \param [in] packet The data packet sent from the internet.
+   */
+  typedef void (* RxTracedCallback)
+    (Ptr<Packet> packet);
 
 
   struct EpsFlowId_t
@@ -192,6 +202,11 @@ private:
   Ptr<Socket> m_lteSocket;
 
   /**
+   * raw packet socket to send and receive the packets to and from the LTE radio interface
+   */
+  Ptr<Socket> m_lteSocket6;
+
+  /**
    * UDP socket to send and receive GTP-U the packets to and from the S1-U interface
    */
   Ptr<Socket> m_s1uSocket;
@@ -253,6 +268,15 @@ private:
 
   uint16_t m_cellId;
 
+  /**
+   * \brief Callback to trace RX (reception) data packets from LTE Enb Net Device.
+   */ 
+  TracedCallback<Ptr<Packet> > m_rxLteenbPktTrace;
+
+  /**
+   * \brief Callback to trace RX (reception) data packets from S1-U Net Device.
+   */ 
+  TracedCallback<Ptr<Packet> > m_rxS1uPktTrace;
 };
 
 } //namespace ns3

@@ -52,9 +52,6 @@ NS_LOG_COMPONENT_DEFINE ("mip6Wifi");
 int main (int argc, char *argv[])
 {
 
-CommandLine cmd;
-cmd.Parse (argc, argv);
-
 NodeContainer sta;
 NodeContainer ha;
 NodeContainer cn;
@@ -62,6 +59,9 @@ NodeContainer ars;
 NodeContainer mid;
 NodeContainer backbone1;
 NodeContainer backbone2;
+
+CommandLine cmd;
+cmd.Parse (argc, argv);
 
 ars.Create (2);
 ha.Create (1);
@@ -352,8 +352,8 @@ clientApps3.Stop (Seconds (700.0));
 clientApps4.Start (Seconds (7.1));
 clientApps4.Stop (Seconds (700.0));
 
-//LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_ALL);
-//LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_ALL);
+LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_ALL);
+LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_ALL);
 
 
 
